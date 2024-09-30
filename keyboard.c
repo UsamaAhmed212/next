@@ -73,7 +73,13 @@ const wchar_t consonants[] = {
 };
 
 
-// Function to check if a Unicode character is a vowel
+/**
+ * Function to check if a given Unicode character is a vowel.
+ * Parameters:
+ * - @param unicodeChar: The Unicode character to check.
+ * Returns:
+ * - @return true if the character is a vowel, false otherwise.
+ */
 bool isVowel(wchar_t unicodeChar) {
     for (int i = 0; i < sizeof(vowels) / sizeof(vowels[0]); i++) {
         if (unicodeChar == vowels[i]) {
@@ -83,7 +89,13 @@ bool isVowel(wchar_t unicodeChar) {
     return false;
 }
 
-// Function to check if a Unicode character is a vowel
+/**
+ * Function to check if a given Unicode character is a vowel sign.
+ * Parameters:
+ * - @param unicodeChar: The Unicode character to check.
+ * Returns:
+ * - @return true if the character is a vowel sign, false otherwise.
+ */
 bool isVowelSign(wchar_t unicodeChar) {
     for (int i = 0; i < sizeof(vowel_signs) / sizeof(vowel_signs[0]); i++) {
         if (unicodeChar == vowel_signs[i]) {
@@ -93,7 +105,13 @@ bool isVowelSign(wchar_t unicodeChar) {
     return false;
 }
 
-// Function to check if a Unicode character is a consonant
+/**
+ * Function to check if a given Unicode character is a consonant.
+ * Parameters:
+ * - @param unicodeChar: The Unicode character to check.
+ * Returns:
+ * - @return true if the character is a consonant, false otherwise.
+ */
 bool isConsonant(wchar_t unicodeChar) {
     for (int i = 0; i < sizeof(consonants) / sizeof(consonants[0]); i++) {
         if (unicodeChar == consonants[i]) {
@@ -103,6 +121,11 @@ bool isConsonant(wchar_t unicodeChar) {
     return false;
 }
 
+/**
+ * Function to simulate pressing the Backspace key a specified number of times.
+ * Parameters:
+ * - @param count: The number of times to send the Backspace key input.
+ */
 void SendBackspace(int count) {
     printf("SendBackspace() Function run \n");
 
@@ -123,39 +146,97 @@ void SendBackspace(int count) {
     }
 }
 
+/**
+ * Function to add a new wide character to the end of a wide character array.
+ * Parameters:
+ * - @param arr: Pointer to the wide character array.
+ * - @param size: Pointer to the integer representing the current size of the array.
+ * - @param value: The wide character value to be added to the array.
+ */
 void push(wchar_t** arr, int* size, wchar_t value) {
     *size += 1;
     *arr = realloc(*arr, *size * sizeof(wchar_t)); // Resize the array
     if (*arr == NULL) {
-        fwprintf(stderr, L"Memory allocation failed\n");
+        fwprintf(stderr, L"Memory allocation failed\n"); // Print an error message if memory allocation fails
         exit(1);
     }
     (*arr)[*size - 1] = value; // Add the new element at the end
+}
+
+/**
+ * Function to remove the first element from a wide character array by shifting all elements to the left.
+ * Parameters:
+ * - @param @param arr: Pointer to the wide character array.
+ * - @param @param size: Pointer to the integer representing the current size of the array.
+ */
+void shift(wchar_t** arr, int* size) {
+    if (*size == 0) {
+        fwprintf(stderr, L"Array is empty, nothing to remove\n");
+        return;
+    }
+
+    // Shift elements to the left
+    for (int i = 1; i < *size; i++) {
+        (*arr)[i - 1] = (*arr)[i];
+    }
+
+    *size -= 1;
+    *arr = realloc(*arr, *size * sizeof(wchar_t)); // Resize the array
+    if (*arr == NULL && *size > 0) {
+        fwprintf(stderr, L"Memory allocation failed\n");
+        exit(1);
+    }
+}
+
+/**
+ * Function to remove the last element from a wide character array and update the array size.
+ * Parameters:
+ * - @param @param @param arr: Pointer to the wide character array.
+ * - @param @param @param size: Pointer to the integer representing the current size of the array.
+ */
+void pop(wchar_t** arr, int* size) {
+    if (*size == 0) {
+        fwprintf(stderr, L"Array is empty, nothing to pop\n"); // Print error message if there is nothing to pop
+        return; // Return from the function if array is empty
+    }
+
+    *size -= 1; // Decrease the array size by 1
+    if (*size == 0) {
+        free(*arr); // Free the memory allocated to the array
+        *arr = NULL; // Set the array pointer to NULL
+    } else {
+        *arr = realloc(*arr, *size * sizeof(wchar_t)); // Resize the array to the new size
+        if (*arr == NULL) {
+            fwprintf(stderr, L"Memory allocation failed\n"); // Print error message if memory reallocation failed
+            exit(1); // Exit the program in case of memory reallocation failure
+        }
+    }
 }
 
 
 // To track the sequence of key presses 'ঋ'
 int rie_keyPressCount = 0;
 
-// Function to process key Press Count 'ঋ'
-void rie_keyPressCountProcess(wchar_t unicodeChar) {
-    // printf("Key pressed: 0x%X \n", unicodeChar);  // Del
+/**
+ * Function to track the sequence of key presses for forming the 'ঋ' character.
+ * Parameters:
+ * - @param virtualKeyCode: The virtual key code representing the key pressed.
+ */
+void rie_keyPressCountProcess(int virtualKeyCode) {
+    // printf("rie_keyPressCountProcess() Function run \n");
 
-    if (unicodeChar == 0x9B0) {  // 'র'
+    if (virtualKeyCode == 0x52) {  // 'R' key
         rie_keyPressCount = 1; // Start counting for 'ঋ'
-    } else if (unicodeChar == 0x987 || unicodeChar == 0x9BF || unicodeChar == 0x988 || unicodeChar == 0x9C0) {  // 'ই' || 'ি' || 'ঈ' || 'ী'
-        // printf("unicodeChar: 0x%X \n", unicodeChar);  // Del
-        // printf("rie_keyPressCount Inside 'I': %d\n", rie_keyPressCount);  // Del
+    } else if (virtualKeyCode == 0x49) {  // 'I' key
         if (rie_keyPressCount == 1) {
             rie_keyPressCount = 2; // Increment count to indicate 'ঋ' is in progress
         } else {
-            rie_keyPressCount = 0; // Reset if 'ই' is pressed out of order
+            rie_keyPressCount = 0; // Reset if 'I' or 'E' is pressed out of order
         }
     } else {
         rie_keyPressCount = 0; // Reset the rie(ঋ) counter for any other key press
     }
 }
-
 
 
 
@@ -186,13 +267,32 @@ wchar_t lastKeyPressUnicodeChar = 0;
 wchar_t* lastKeyPressUnicodeCharArray = NULL;
 int unicodeCharArraySize = 0;
 
-// Send Unicode character as keyboard input
-void SendUnicodeChar(wchar_t unicodeChar) {
-    // Check if the character is not Backspace (Unicode 0x8)  and not a vowel sign
-    if (unicodeChar != 0x8 && !isVowelSign(unicodeChar)) {
-        lastKeyPressUnicodeChar = unicodeChar; // Update last key press Unicode character
 
+/**
+ * Function to send a Unicode character and manage the last key pressed.
+ * 
+ * Parameters:
+ * - @param virtualKeyCode: The virtual key code representing the key pressed.
+ * - @param unicodeChar: The Unicode character to be sent as input.
+ */
+void SendUnicodeChar(int virtualKeyCode, wchar_t unicodeChar) {
+    // Check if the character is not Backspace (Unicode 0x8)
+    if (unicodeChar != 0x8) {
+        lastKeyPressUnicodeChar = unicodeChar; // Update last key press Unicode character
+        
         push(&lastKeyPressUnicodeCharArray, &unicodeCharArraySize, unicodeChar); // Add the character to the array and update the array size
+    } else {
+        if (unicodeCharArraySize > 0) {
+            if (lastKeyPressUnicodeCharArray[unicodeCharArraySize - 1] != 0x20) {
+                pop(&lastKeyPressUnicodeCharArray, &unicodeCharArraySize); // Remove the last element from the array
+
+                if (unicodeCharArraySize > 0) { // Check if the array still has elements
+                    lastKeyPressUnicodeChar = lastKeyPressUnicodeCharArray[unicodeCharArraySize - 1]; // Update last key press Unicode character
+                } else {
+                    lastKeyPressUnicodeChar = 0; // Reset if the array is now empty
+                }
+            }
+        }
     }
 
 
@@ -202,13 +302,14 @@ void SendUnicodeChar(wchar_t unicodeChar) {
     //     printf("0x%X \n", lastKeyPressUnicodeCharArray[i]);
     // }
     // printf("NExT Print \n");
-    // printf("0x%X \n", lastKeyPressUnicodeCharArray[unicodeCharArraySize - 2]);
+    // printf("0x%X \n", lastKeyPressUnicodeChar);
     
-    rie_keyPressCountProcess(unicodeChar);  // 'ঋ'
+    rie_keyPressCountProcess(virtualKeyCode); // Process the key press count for forming the 'ঋ' character based on the virtual key code
+
 
     // printf("Size %d \n", unicodeCharArraySize);
 
-    // printf("0x%X \n", lastKeyPressUnicodeCharArray[unicodeCharArraySize - 3]);
+    // printf("0x%X \n", lastKeyPressUnicodeCharArray[unicodeCharArraySize - 1]);
 
     // printf("Key pressed: 0x%X \n", unicodeChar);
     
@@ -264,11 +365,11 @@ LRESULT CALLBACK KeyboardHook(int nCode, WPARAM wParam, LPARAM lParam) {
             
             switch (pKeyboard->vkCode) {
                 case VK_SPACE:  // Space key
-                    SendUnicodeChar(0x20);  // Unicode for space
+                    SendUnicodeChar(0x20, 0x20);  // Unicode for space
                     return 1; // Block original space key
 
                 case VK_BACK:  // Backspace key
-                    SendUnicodeChar(0x8);  // Unicode for backspace (ASCII 8)
+                    SendUnicodeChar(0x8, 0x8);  // Unicode for backspace (ASCII 8)
                     // printf("BlockSpace key Press \n");
                     return 0; // Block original backspace key
 
@@ -282,16 +383,16 @@ LRESULT CALLBACK KeyboardHook(int nCode, WPARAM wParam, LPARAM lParam) {
                     if (!isUppercase()) {
                         // Handle Lowercase 'a'
                         if (!isConsonant(lastKeyPressUnicodeChar)) {
-                            SendUnicodeChar(0x985);  // 'অ'
+                            SendUnicodeChar(0x41, 0x985);  // 'অ'
                         } else {
-                            SendUnicodeChar(0x9be);  // 'া'
+                            SendUnicodeChar(0x41, 0x9be);  // 'া'
                         }
                     } else {
                         // Handle Uppercase 'A'
                         if (!isConsonant(lastKeyPressUnicodeChar)) {
-                            SendUnicodeChar(0x986);  // 'আ'
+                            SendUnicodeChar(0x41, 0x986);  // 'আ'
                         } else {
-                            SendUnicodeChar(0x9be);  // 'া'
+                            SendUnicodeChar(0x41, 0x9be);  // 'া'
                         }
                     }
                     return 1; // Block original 'A' or 'a'
@@ -303,16 +404,16 @@ LRESULT CALLBACK KeyboardHook(int nCode, WPARAM wParam, LPARAM lParam) {
                     if (!isUppercase()) {
                         // Handle Lowercase 'i'
                         if (!isConsonant(lastKeyPressUnicodeChar)) {
-                            SendUnicodeChar(0x987);  // 'ই'
+                            SendUnicodeChar(0x49, 0x987);  // 'ই'
                         } else {
-                            SendUnicodeChar(0x9BF);  // 'ি'
+                            SendUnicodeChar(0x49, 0x9BF);  // 'ি'
                         }
                     } else {
                         // Handle Uppercase 'I'
                         if (!isConsonant(lastKeyPressUnicodeChar)) {
-                            SendUnicodeChar(0x988);  // 'ঈ'
+                            SendUnicodeChar(0x49, 0x988);  // 'ঈ'
                         } else {
-                            SendUnicodeChar(0x9C0);  // 'ী'
+                            SendUnicodeChar(0x49, 0x9C0);  // 'ী'
                         }
                     }
                     return 1; // Block original 'I' or 'i'
@@ -324,16 +425,16 @@ LRESULT CALLBACK KeyboardHook(int nCode, WPARAM wParam, LPARAM lParam) {
                     if (!isUppercase()) {
                         // Handle Lowercase 'u'
                         if (!isConsonant(lastKeyPressUnicodeChar)) {
-                            SendUnicodeChar(0x989);  // 'উ'
+                            SendUnicodeChar(0x55, 0x989);  // 'উ'
                         } else {
-                            SendUnicodeChar(0x9C1);  // 'ু'
+                            SendUnicodeChar(0x55, 0x9C1);  // 'ু'
                         }
                     } else {
                         // Handle Uppercase 'U'
                         if (!isConsonant(lastKeyPressUnicodeChar)) {
-                            SendUnicodeChar(0x98A);  // 'ঊ'
+                            SendUnicodeChar(0x55, 0x98A);  // 'ঊ'
                         } else {
-                            SendUnicodeChar(0x9C2);  // 'ূ'
+                            SendUnicodeChar(0x55, 0x9C2);  // 'ূ'
                         }
                     }
                     return 1; // Block original 'U' or 'u'
@@ -342,11 +443,10 @@ LRESULT CALLBACK KeyboardHook(int nCode, WPARAM wParam, LPARAM lParam) {
                 case 0x45: // 'E' or 'e'
                     if (rie_keyPressCount == 2) {
                         SendBackspace(2);  // Send two backspaces
-
-                        if (unicodeCharArraySize < 3 || !isConsonant(lastKeyPressUnicodeCharArray[unicodeCharArraySize - 3])) {
-                            SendUnicodeChar(0x98B);  // 'ঋ'
+                        if (unicodeCharArraySize < 1 || !isConsonant(lastKeyPressUnicodeCharArray[unicodeCharArraySize - 1])) {
+                            SendUnicodeChar(0x45, 0x98B);  // 'ঋ'
                         } else {
-                            SendUnicodeChar(0x9C3);  // 'ৃ'
+                            SendUnicodeChar(0x45, 0x9C3);  // 'ৃ'
                         }
                         return 1; // Block original 'E' or 'e'
                     }
@@ -356,16 +456,16 @@ LRESULT CALLBACK KeyboardHook(int nCode, WPARAM wParam, LPARAM lParam) {
                     if (!isUppercase()) {
                         // Handle Lowercase 'e'
                         if (!isConsonant(lastKeyPressUnicodeChar)) {
-                        SendUnicodeChar(0x98F);  // 'এ'
+                        SendUnicodeChar(0x45, 0x98F);  // 'এ'
                         } else {
-                            SendUnicodeChar(0x9C7);  // 'ে'
+                            SendUnicodeChar(0x45, 0x9C7);  // 'ে'
                         }
                     } else {
                         // Handle Uppercase 'E'
                         if (!isConsonant(lastKeyPressUnicodeChar)) {
-                            SendUnicodeChar(0x990);  // 'ঐ'
+                            SendUnicodeChar(0x45, 0x990);  // 'ঐ'
                         } else {
-                            SendUnicodeChar(0x9C8);  // 'ৈ'
+                            SendUnicodeChar(0x45, 0x9C8);  // 'ৈ'
                         }
                     }
                     return 1; // Block original 'E' or 'e'
@@ -377,16 +477,16 @@ LRESULT CALLBACK KeyboardHook(int nCode, WPARAM wParam, LPARAM lParam) {
                     if (!isUppercase()) {
                         // Handle Lowercase 'o'
                         if (!isConsonant(lastKeyPressUnicodeChar)) {
-                            SendUnicodeChar(0x993);  // 'ও'
+                            SendUnicodeChar(0x4F, 0x993);  // 'ও'
                         } else {
-                            SendUnicodeChar(0x9CB);  // 'ো'
+                            SendUnicodeChar(0x4F, 0x9CB);  // 'ো'
                         }
                     } else {
                         // Handle Uppercase 'O'
                         if (!isConsonant(lastKeyPressUnicodeChar)) {
-                            SendUnicodeChar(0x994);  // 'ঔ'
+                            SendUnicodeChar(0x4F, 0x994);  // 'ঔ'
                         } else {
-                            SendUnicodeChar(0x9CC);  // 'ৌ'
+                            SendUnicodeChar(0x4F, 0x9CC);  // 'ৌ'
                         }
                     }
                     return 1; // Block original 'O' or 'o'
@@ -395,66 +495,200 @@ LRESULT CALLBACK KeyboardHook(int nCode, WPARAM wParam, LPARAM lParam) {
                 /**
                 ** Consonant (ব্যঞ্জনবর্ণ)	Key Mapping
                 **/
-               case 0x4B: // 'K' or'k'
+               case 0x4B: // 'K' or 'k'
                     if (isCtrlPressed) return 0; // Allow original key input if Ctrl key is pressed
                
                     if (!isUppercase()) {
                         // Handle Lowercase 'k'
-                        SendUnicodeChar(0x995);  // 'ক'
+                        SendUnicodeChar(0x4B, 0x995);  // 'ক'
                     } else {
                         // Handle Uppercase 'K'
-                        SendUnicodeChar(0x996);  // 'খ'
+                        SendUnicodeChar(0x4B, 0x996);  // 'খ'
                     }
-                    return 1; // Block original 'K' or'k'
+                    return 1; // Block original 'K' or 'k'
 
 
-               case 0x47: // 'G' or'g'
+               case 0x47: // 'G' or 'g'
                     if (isCtrlPressed) return 0; // Allow original key input if Ctrl key is pressed
                
                     if (!isUppercase()) {
                         // Handle Lowercase 'g'
-                        SendUnicodeChar(0x997);  // 'গ'
+                        SendUnicodeChar(0x47, 0x997);  // 'গ'
                     } else {
                         // Handle Uppercase 'G'
-                        SendUnicodeChar(0x998);  // 'ঘ'
+                        SendUnicodeChar(0x47, 0x998);  // 'ঘ'
                     }
-                    return 1; // Block original 'G' or'g'
-            //    case 0x47: // 'G' or'g'
-            //         // SendUnicodeChar(0x999);  // 'ঙ'
-            //         return 1; // Block original 'G' or'g'
+                    return 1; // Block original 'G' or 'g'
+            //    case 0x47: // 'G' or 'g'
+            //         // SendUnicodeChar(0x47, 0x999);  // 'ঙ'
+            //         return 1; // Block original 'G' or 'g'
 
 
-               case 0x43: // 'C' or'c'
+               case 0x43: // 'C' or 'c'
                     if (isCtrlPressed) return 0; // Allow original key input if Ctrl key is pressed
 
                     if (!isUppercase()) {
                         // Handle Lowercase 'c'
-                        SendUnicodeChar(0x99A);  // 'চ'
+                        SendUnicodeChar(0x43, 0x99A);  // 'চ'
                     } else {
                         // Handle Uppercase 'C'
-                        SendUnicodeChar(0x99B);  // 'ছ'
+                        SendUnicodeChar(0x43, 0x99B);  // 'ছ'
                     }
-                    return 1; // Block original 'C' or'c'
+                    return 1; // Block original 'C' or 'c'
 
 
-               case 0x4A: // 'J' or'j'
+               case 0x4A: // 'J' or 'j'
                     if (isCtrlPressed) return 0; // Allow original key input if Ctrl key is pressed
                
                     if (!isUppercase()) {
                         // Handle Lowercase 'j'
-                        SendUnicodeChar(0x99C);  // 'জ
+                        SendUnicodeChar(0x4A, 0x99C);  // 'জ
                     } else {
                         // Handle Uppercase 'J'
-                        SendUnicodeChar(0x99D);  // 'ঝ'
+                        SendUnicodeChar(0x4A, 0x99D);  // 'ঝ'
                     }
-                    return 1; // Block original 'K' or'k'
+                    return 1; // Block original 'K' or 'k'
+
+
+            //    case 0x..: // '' or ''
+            //         SendUnicodeChar(0x.., 0x99E);  // 'ঞ'
+            //         return 1; // Block original '' or ''
+
+
+               case 0x54: // 'T' or't'
+                    SendUnicodeChar(0x54, 0x99F);  // 'ট'
+                    return 1; // Block original '' or ''
+
+
+            //    case 0x54: // '' or ''
+            //         SendUnicodeChar(0x54, 0x9A0);  // 'ঠ'
+            //         return 1; // Block original '' or ''
+
+               case 0x44: // 'D' or 'd'
+                    SendUnicodeChar(0x44, 0x9A1);  // 'ড'
+                    return 1; // Block original '' or ''
+
+            //    case 0x44: // '' or ''
+            //         SendUnicodeChar(0x44, 0x9A2);  // 'ঢ'
+            //         return 1; // Block original '' or ''
+
+               case 0x4E: // 'N' or 'n'
+                    SendUnicodeChar(0x4E, 0x9A3);  // 'ণ'
+                    return 1; // Block original '' or ''
+
+            //    case 0x54: // 'T' or 't'
+            //         SendUnicodeChar(0x54, 0x9A4);  // 'ত'
+            //         return 1; // Block original '' or ''
+
+            //    case 0x54: // '' or ''
+            //         SendUnicodeChar(0x54, 0x9A5);  // 'থ'
+            //         return 1; // Block original '' or ''
+
+            //    case 0x44: // 'D' or 'd'
+            //         SendUnicodeChar(0x44, 0x9A6);  // 'দ'
+            //         return 1; // Block original '' or ''
+
+            //    case 0x44: // '' or ''
+            //         SendUnicodeChar(0x44, 0x9A7);  // 'ধ'
+            //         return 1; // Block original '' or ''
+
+            //    case 0x4E: // 'N' or 'n'
+            //         SendUnicodeChar(0x4E, 0x9A8);  // 'ন'
+            //         return 1; // Block original '' or ''
+
+
+
+
+
+
+            //    case 0x..: // '' or ''
+            //         SendUnicodeChar(0x.., 0x9AA);  // 'প'
+            //         return 1; // Block original '' or ''
+
+            //    case 0x..: // '' or ''
+            //         SendUnicodeChar(0x.., 0x9AB);  // 'ফ'
+            //         return 1; // Block original '' or ''
+
+            //    case 0x..: // '' or ''
+            //         SendUnicodeChar(0x.., 0x9AC);  // 'ব'
+            //         return 1; // Block original '' or ''
+
+            //    case 0x..: // '' or ''
+            //         SendUnicodeChar(0x.., 0x9AD);  // 'ভ'
+            //         return 1; // Block original '' or ''
+
+            //    case 0x..: // '' or ''
+            //         SendUnicodeChar(0x.., 0x9AE);  // 'ম'
+            //         return 1; // Block original '' or ''
+
+            //    case 0x..: // '' or ''
+            //         SendUnicodeChar(0x.., 0x9AF);  // 'য'
+            //         return 1; // Block original '' or ''
+
+            //    case 0x..: // '' or ''
+            //         SendUnicodeChar(0x.., 0x9B0);  // 'র'
+            //         return 1; // Block original '' or ''
+
+            //    case 0x..: // '' or ''
+            //         SendUnicodeChar(0x.., 0x9B2);  // 'ল'
+            //         return 1; // Block original '' or ''
+
+            //    case 0x..: // '' or ''
+            //         SendUnicodeChar(0x.., 0x9B6);  // 'শ'
+            //         return 1; // Block original '' or ''
+
+            //    case 0x..: // '' or ''
+            //         SendUnicodeChar(0x.., 0x9B7);  // 'ষ'
+            //         return 1; // Block original '' or ''
+
+            //    case 0x..: // '' or ''
+            //         SendUnicodeChar(0x.., 0x9B8);  // 'স'
+            //         return 1; // Block original '' or ''
+
+            //    case 0x..: // '' or ''
+            //         SendUnicodeChar(0x.., 0x9B9);  // 'হ'
+            //         return 1; // Block original '' or ''
+
+            //    case 0x..: // '' or ''
+            //         SendUnicodeChar(0x.., 0x9DC);  // 'ড়'
+            //         return 1; // Block original '' or ''
+
+            //    case 0x..: // '' or ''
+            //         SendUnicodeChar(0x.., 0x9DD);  // 'ঢ়'
+            //         return 1; // Block original '' or ''
+
+            //    case 0x..: // '' or ''
+            //         SendUnicodeChar(0x.., 0x9DF);  // 'য়'
+            //         return 1; // Block original '' or ''
+
+            //    case 0x..: // '' or ''
+            //         SendUnicodeChar(0x.., 0x9ce);  // 'ৎ'
+            //         return 1; // Block original '' or ''
+
+            //    case 0x..: // '' or ''
+            //         SendUnicodeChar(0x.., 0x982);  // 'ং'
+            //         return 1; // Block original '' or ''
+
+            //    case 0x..: // '' or ''
+            //         SendUnicodeChar(0x.., 0x983);  // 'ঃ'
+            //         return 1; // Block original '' or ''
+
+            //    case 0x..: // '' or ''
+            //         SendUnicodeChar(0x.., 0x981);  // 'ঁ'
+            //         return 1; // Block original '' or ''
 
 
                 case 0x52: // 'R' or'r'
                     if (isCtrlPressed) return 0; // Allow original key input if Ctrl key is pressed
 
-                    SendUnicodeChar(0x9B0);  // 'র'
-                    return 1; // Block original 'R' or r
+                    SendUnicodeChar(0x52, 0x9B0);  // 'র'
+                    return 1; // Block original 'R' or 'r'
+                    
+                
+
+               case 0x58: // 'X' or'x'
+                    SendUnicodeChar(0x58, 0x981);  // 'ঁ'
+                    return 1; // Block original '' or ''
                     
                 // Handle more vowel mappings here if needed
 
