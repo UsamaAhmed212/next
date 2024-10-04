@@ -298,24 +298,47 @@ void nio_keyPressCountProcess(int virtualKeyCode) {
 
 
 /**
- * Function to track the sequence of key presses for forming the 'ঠ' character.
+ * Function to track the sequence of key presses for forming the 'ঠ' an 'থ' character.
  * Parameters:
  * - @param virtualKeyCode: The virtual key code representing the key pressed.
  */
 
-int tho_keyPressCount = 0; // track the sequence of key presses 'ঠ'
-int to_keyPressCount = 0; // track the sequence of key presses 'থ'
+int to_keyPressCount = 0; // track the sequence of key presses 'ঠ'
+int tho_keyPressCount = 0; // track the sequence of key presses 'থ'
 
-void tho_and_to_keyPressCountProcess(int virtualKeyCode) {
+void to_and_tho_keyPressCountProcess(int virtualKeyCode) {
     if (virtualKeyCode == 0x54) {  // 'T' or 't' key
         if (isUppercase()) {  // Check if the key pressed is 'T' or 't'
-            tho_keyPressCount = 1; // Start counting for 'ঠ'
+            to_keyPressCount = 1; // Start counting for 'ঠ'
         } else {
-            to_keyPressCount = 1; // Start counting for 'থ'
+            tho_keyPressCount = 1; // Start counting for 'থ'
         }
     } else {
-        tho_keyPressCount = 0; // Reset the tho(ঠ) counter for any other key press
-        to_keyPressCount = 0;  // Reset the to(থ) counter for any other key press
+        to_keyPressCount = 0; // Reset the to(ঠ) counter for any other key press
+        tho_keyPressCount = 0;  // Reset the tho(থ) counter for any other key press
+    }
+}
+
+
+/**
+ * Function to track the sequence of key presses for forming the 'ঢ' an 'ধ' character.
+ * Parameters:
+ * - @param virtualKeyCode: The virtual key code representing the key pressed.
+ */
+
+int dho_keyPressCount = 0; // track the sequence of key presses 'ঢ'
+int do_keyPressCount = 0; // track the sequence of key presses 'ধ'
+
+void dho_and_do_keyPressCountProcess(int virtualKeyCode) {
+    if (virtualKeyCode == 0x44) {  // 'D' or 'd' key
+        if (isUppercase()) {  // Check if the key pressed is 'D' or 'd'
+            dho_keyPressCount = 1; // Start counting for 'ঢ'
+        } else {
+            do_keyPressCount = 1; // Start counting for 'ধ'
+        }
+    } else {
+        dho_keyPressCount = 0; // Reset the dho(ঢ) counter for any other key press
+        do_keyPressCount = 0;  // Reset the do(ধ) counter for any other key press
     }
 }
 
@@ -387,7 +410,9 @@ void SendUnicodeChar(int virtualKeyCode, wchar_t unicodeChar) {
 
     nio_keyPressCountProcess(virtualKeyCode); // Process the key press count for forming the 'ঞ' character based on the virtual key code
     
-    tho_and_to_keyPressCountProcess(virtualKeyCode); // Process the key press count for forming the 'ঠ' and 'থ' character based on the virtual key code
+    to_and_tho_keyPressCountProcess(virtualKeyCode); // Process the key press count for forming the 'ঠ' and 'থ' character based on the virtual key code
+    
+    dho_and_do_keyPressCountProcess(virtualKeyCode); // Process the key press count for forming the 'ঢ' and 'ধ' character based on the virtual key code
 
 
     // printf("Size %d \n", unicodeCharArraySize);
@@ -652,20 +677,20 @@ LRESULT CALLBACK KeyboardHook(int nCode, WPARAM wParam, LPARAM lParam) {
                
                     if (!isUppercase()) {
                         // Handle Lowercase 't'
-                        if (to_keyPressCount == 1) {
+                        if (tho_keyPressCount == 1) {
                             SendBackspace(1);  // Send two backspaces
                             SendUnicodeChar(0x54, 0x9A5);  // 'থ'
-                            to_keyPressCount = 0; // Reset the tho(থ) counter
+                            tho_keyPressCount = 0; // Reset the tho(থ) counter
                         } else {
                             SendUnicodeChar(0x54, 0x9A4);  // 'ত'
                         }
                         
                     } else {
                         // Handle Uppercase 'T'
-                        if (tho_keyPressCount == 1) {
+                        if (to_keyPressCount == 1) {
                             SendBackspace(1);  // Send two backspaces
                             SendUnicodeChar(0x54, 0x9A0);  // 'ঠ'
-                            tho_keyPressCount = 0; // Reset the tho(ঠ) counter
+                            to_keyPressCount = 0; // Reset the to(ঠ) counter
                         } else {
                             SendUnicodeChar(0x54, 0x99F);  // 'ট'
                         }
@@ -678,24 +703,24 @@ LRESULT CALLBACK KeyboardHook(int nCode, WPARAM wParam, LPARAM lParam) {
 
                     if (!isUppercase()) {
                         // Handle Lowercase 'd'
-                        SendUnicodeChar(0x44, 0x9A6);  // 'দ'
+                        if (do_keyPressCount == 1) {
+                            SendBackspace(1);  // Send two backspaces
+                            SendUnicodeChar(0x44, 0x9A7);  // 'ধ'
+                            do_keyPressCount = 0; // Reset the do(ধ) counter
+                        } else {
+                            SendUnicodeChar(0x44, 0x9A6);  // 'দ'
+                        }
                     } else {
                         // Handle Uppercase 'D'
-                        SendUnicodeChar(0x44, 0x9A1);  // 'ড'
+                        if (dho_keyPressCount == 1) {
+                            SendBackspace(1);  // Send two backspaces
+                            SendUnicodeChar(0x44, 0x9A2);  // 'ঢ'
+                            dho_keyPressCount = 0; // Reset the dho(ঢ) counter
+                        } else {
+                            SendUnicodeChar(0x44, 0x9A1);  // 'ড'
+                        }
                     }
                     return 1; // Block original 'D' or 'd'
-
-            //    case 0x44: // '' or ''
-            //         SendUnicodeChar(0x44, 0x9A2);  // 'ঢ'
-            //         return 1; // Block original '' or ''
-
-            //    case 0x44: // 'D' or 'd'
-            //         SendUnicodeChar(0x44, 0x9A6);  // 'দ'
-            //         return 1; // Block original '' or ''
-
-            //    case 0x44: // '' or ''
-            //         SendUnicodeChar(0x44, 0x9A7);  // 'ধ'
-            //         return 1; // Block original '' or ''
 
 
                case 0x4E: // 'N' or 'n'
@@ -712,16 +737,31 @@ LRESULT CALLBACK KeyboardHook(int nCode, WPARAM wParam, LPARAM lParam) {
                     return 1; // Block original 'N' or 'n'
 
 
+               case 0x50: // 'P' or 'p'
+                    if (isCtrlPressed) return 0; // Allow original key input if Ctrl key is pressed
+
+                    if (!isUppercase()) {
+                        // Handle Lowercase 'p'
+                        SendUnicodeChar(0x50, 0x9AA);  // 'প'
+                    } else {
+                        // Handle Uppercase 'P'
+                        SendUnicodeChar(0x50, 0x9AB);  // 'ফ'
+                    }
+                    return 1; // Block original 'P' or 'p'
 
 
+               case 0x46: // 'F' or 'f'
+                    if (isCtrlPressed) return 0; // Allow original key input if Ctrl key is pressed
 
-            //    case 0x..: // '' or ''
-            //         SendUnicodeChar(0x.., 0x9AA);  // 'প'
-            //         return 1; // Block original '' or ''
+                    if (!isUppercase()) {
+                        // Handle Lowercase 'p'
+                        SendUnicodeChar(0x46, 0x9AB);  // 'ফ'
+                    } else {
+                        // Handle Uppercase 'P'
+                        SendUnicodeChar(0x46, 0x9AA);  // 'প'
+                    }
+                    return 1; // Block original 'F' or 'f'
 
-            //    case 0x..: // '' or ''
-            //         SendUnicodeChar(0x.., 0x9AB);  // 'ফ'
-            //         return 1; // Block original '' or ''
 
             //    case 0x..: // '' or ''
             //         SendUnicodeChar(0x.., 0x9AC);  // 'ব'
