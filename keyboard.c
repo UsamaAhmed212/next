@@ -127,7 +127,7 @@ bool isConsonant(wchar_t unicodeChar) {
  * - @param count: The number of times to send the Backspace key input.
  */
 void SendBackspace(int count) {
-    printf("SendBackspace() Function run \n");
+    // printf("SendBackspace() Function run \n");
 
     INPUT input[4]; // Maximum of 2 backspaces, hence 4 inputs (2 down + 2 up)
 
@@ -238,6 +238,7 @@ bool isUppercase() {
  */
 
 int rie_keyPressCount = 0; // track the sequence of key presses 'ঋ'
+
 void rie_keyPressCountProcess(int virtualKeyCode) {
     if (virtualKeyCode == 0x52) {  // 'R' key
         rie_keyPressCount = 1; // Start counting for 'ঋ'
@@ -260,6 +261,7 @@ void rie_keyPressCountProcess(int virtualKeyCode) {
  */
 
 int umo_keyPressCount = 0; // track the sequence of key presses 'ঙ'
+
 void umo_keyPressCountProcess(int virtualKeyCode) {
     if (virtualKeyCode == 0x55) {  // 'U' key
         umo_keyPressCount = 1; // Start counting for 'ঙ'
@@ -343,6 +345,23 @@ void dho_and_do_keyPressCountProcess(int virtualKeyCode) {
 }
 
 
+/**
+ * Function to track the sequence of key presses for forming the 'ঢ়' character.
+ * Parameters:
+ * - @param virtualKeyCode: The virtual key code representing the key pressed.
+ */
+
+int rho_keyPressCount = 0; // track the sequence of key presses 'ঢ়'
+
+void rho_keyPressCountProcess(int virtualKeyCode) {
+    if (virtualKeyCode == 0x52) {  // 'R' or'r' key
+        rho_keyPressCount = 1; // Start counting for 'ঢ়'
+    } else {
+        rho_keyPressCount = 0;  // Reset the rho(ঢ়) counter for any other key press
+    }
+}
+
+
 
 
 
@@ -413,6 +432,8 @@ void SendUnicodeChar(int virtualKeyCode, wchar_t unicodeChar) {
     to_and_tho_keyPressCountProcess(virtualKeyCode); // Process the key press count for forming the 'ঠ' and 'থ' character based on the virtual key code
     
     dho_and_do_keyPressCountProcess(virtualKeyCode); // Process the key press count for forming the 'ঢ' and 'ধ' character based on the virtual key code
+    
+    rho_keyPressCountProcess(virtualKeyCode); // Process the key press count for forming the 'ঢ়' character based on the virtual key code
 
 
     // printf("Size %d \n", unicodeCharArraySize);
@@ -554,6 +575,8 @@ LRESULT CALLBACK KeyboardHook(int nCode, WPARAM wParam, LPARAM lParam) {
 
 
                 case 0x45: // 'E' or 'e'
+                    if (isCtrlPressed) return 0; // Allow original key input if Ctrl key is pressed
+
                     if (rie_keyPressCount == 2) {
                         SendBackspace(2);  // Send two backspaces
                         if (unicodeCharArraySize < 1 || !isConsonant(lastKeyPressUnicodeCharArray[unicodeCharArraySize - 1])) {
@@ -564,8 +587,6 @@ LRESULT CALLBACK KeyboardHook(int nCode, WPARAM wParam, LPARAM lParam) {
                         return 1; // Block original 'E' or 'e'
                     }
                     
-                    if (isCtrlPressed) return 0; // Allow original key input if Ctrl key is pressed
-
                     if (!isUppercase()) {
                         // Handle Lowercase 'e'
                         if (!isConsonant(lastKeyPressUnicodeChar)) {
@@ -585,6 +606,8 @@ LRESULT CALLBACK KeyboardHook(int nCode, WPARAM wParam, LPARAM lParam) {
 
 
                 case 0x4F: // 'O' or 'o'
+                    if (isCtrlPressed) return 0; // Allow original key input if Ctrl key is pressed
+
                     if (umo_keyPressCount == 2) {
                         SendBackspace(2);  // Send two backspaces
                         SendUnicodeChar(0x4F, 0x999);  // 'ঙ'
@@ -597,8 +620,6 @@ LRESULT CALLBACK KeyboardHook(int nCode, WPARAM wParam, LPARAM lParam) {
                         return 1; // Block original 'O' or 'o'
                     }
                     
-                    if (isCtrlPressed) return 0; // Allow original key input if Ctrl key is pressed
-
                     if (!isUppercase()) {
                         // Handle Lowercase 'o'
                         if (!isConsonant(lastKeyPressUnicodeChar)) {
@@ -620,7 +641,7 @@ LRESULT CALLBACK KeyboardHook(int nCode, WPARAM wParam, LPARAM lParam) {
                 /**
                 ** Consonant (ব্যঞ্জনবর্ণ)	Key Mapping
                 **/
-               case 0x4B: // 'K' or 'k'
+                case 0x4B: // 'K' or 'k'
                     if (isCtrlPressed) return 0; // Allow original key input if Ctrl key is pressed
                
                     if (!isUppercase()) {
@@ -633,7 +654,7 @@ LRESULT CALLBACK KeyboardHook(int nCode, WPARAM wParam, LPARAM lParam) {
                     return 1; // Block original 'K' or 'k'
 
 
-               case 0x47: // 'G' or 'g'
+                case 0x47: // 'G' or 'g'
                     if (isCtrlPressed) return 0; // Allow original key input if Ctrl key is pressed
                
                     if (!isUppercase()) {
@@ -646,7 +667,7 @@ LRESULT CALLBACK KeyboardHook(int nCode, WPARAM wParam, LPARAM lParam) {
                     return 1; // Block original 'G' or 'g'
 
 
-               case 0x43: // 'C' or 'c'
+                case 0x43: // 'C' or 'c'
                     if (isCtrlPressed) return 0; // Allow original key input if Ctrl key is pressed
 
                     if (!isUppercase()) {
@@ -659,7 +680,7 @@ LRESULT CALLBACK KeyboardHook(int nCode, WPARAM wParam, LPARAM lParam) {
                     return 1; // Block original 'C' or 'c'
 
 
-               case 0x4A: // 'J' or 'j'
+                case 0x4A: // 'J' or 'j'
                     if (isCtrlPressed) return 0; // Allow original key input if Ctrl key is pressed
                
                     if (!isUppercase()) {
@@ -672,13 +693,13 @@ LRESULT CALLBACK KeyboardHook(int nCode, WPARAM wParam, LPARAM lParam) {
                     return 1; // Block original 'J' or 'j'
 
 
-               case 0x54: // 'T' or't'
+                case 0x54: // 'T' or't'
                     if (isCtrlPressed) return 0; // Allow original key input if Ctrl key is pressed
                
                     if (!isUppercase()) {
                         // Handle Lowercase 't'
                         if (tho_keyPressCount == 1) {
-                            SendBackspace(1);  // Send two backspaces
+                            SendBackspace(1);  // Send One backspaces
                             SendUnicodeChar(0x54, 0x9A5);  // 'থ'
                             tho_keyPressCount = 0; // Reset the tho(থ) counter
                         } else {
@@ -688,7 +709,7 @@ LRESULT CALLBACK KeyboardHook(int nCode, WPARAM wParam, LPARAM lParam) {
                     } else {
                         // Handle Uppercase 'T'
                         if (to_keyPressCount == 1) {
-                            SendBackspace(1);  // Send two backspaces
+                            SendBackspace(1);  // Send One backspaces
                             SendUnicodeChar(0x54, 0x9A0);  // 'ঠ'
                             to_keyPressCount = 0; // Reset the to(ঠ) counter
                         } else {
@@ -698,13 +719,13 @@ LRESULT CALLBACK KeyboardHook(int nCode, WPARAM wParam, LPARAM lParam) {
                     return 1; // Block original 'T' or 't'
 
 
-               case 0x44: // 'D' or 'd'
+                case 0x44: // 'D' or 'd'
                     if (isCtrlPressed) return 0; // Allow original key input if Ctrl key is pressed
 
                     if (!isUppercase()) {
                         // Handle Lowercase 'd'
                         if (do_keyPressCount == 1) {
-                            SendBackspace(1);  // Send two backspaces
+                            SendBackspace(1);  // Send One backspaces
                             SendUnicodeChar(0x44, 0x9A7);  // 'ধ'
                             do_keyPressCount = 0; // Reset the do(ধ) counter
                         } else {
@@ -713,7 +734,7 @@ LRESULT CALLBACK KeyboardHook(int nCode, WPARAM wParam, LPARAM lParam) {
                     } else {
                         // Handle Uppercase 'D'
                         if (dho_keyPressCount == 1) {
-                            SendBackspace(1);  // Send two backspaces
+                            SendBackspace(1);  // Send One backspaces
                             SendUnicodeChar(0x44, 0x9A2);  // 'ঢ'
                             dho_keyPressCount = 0; // Reset the dho(ঢ) counter
                         } else {
@@ -723,7 +744,7 @@ LRESULT CALLBACK KeyboardHook(int nCode, WPARAM wParam, LPARAM lParam) {
                     return 1; // Block original 'D' or 'd'
 
 
-               case 0x4E: // 'N' or 'n'
+                case 0x4E: // 'N' or 'n'
                     if (isCtrlPressed) return 0; // Allow original key input if Ctrl key is pressed
 
                     if (!isUppercase()) {
@@ -737,7 +758,7 @@ LRESULT CALLBACK KeyboardHook(int nCode, WPARAM wParam, LPARAM lParam) {
                     return 1; // Block original 'N' or 'n'
 
 
-               case 0x50: // 'P' or 'p'
+                case 0x50: // 'P' or 'p'
                     if (isCtrlPressed) return 0; // Allow original key input if Ctrl key is pressed
 
                     if (!isUppercase()) {
@@ -750,7 +771,7 @@ LRESULT CALLBACK KeyboardHook(int nCode, WPARAM wParam, LPARAM lParam) {
                     return 1; // Block original 'P' or 'p'
 
 
-               case 0x46: // 'F' or 'f'
+                case 0x46: // 'F' or 'f'
                     if (isCtrlPressed) return 0; // Allow original key input if Ctrl key is pressed
 
                     if (!isUppercase()) {
@@ -763,15 +784,33 @@ LRESULT CALLBACK KeyboardHook(int nCode, WPARAM wParam, LPARAM lParam) {
                     return 1; // Block original 'F' or 'f'
 
 
-            //    case 0x..: // '' or ''
-            //         SendUnicodeChar(0x.., 0x9AC);  // 'ব'
-            //         return 1; // Block original '' or ''
+                case 0x42: // 'B' or 'b'
+                    if (isCtrlPressed) return 0; // Allow original key input if Ctrl key is pressed
 
-            //    case 0x..: // '' or ''
-            //         SendUnicodeChar(0x.., 0x9AD);  // 'ভ'
-            //         return 1; // Block original '' or ''
+                    if (!isUppercase()) {
+                        // Handle Lowercase 'b'
+                        SendUnicodeChar(0x42, 0x9AC);  // 'ব'
+                    } else {
+                        // Handle Uppercase 'B'
+                        SendUnicodeChar(0x42, 0x9AD);  // 'ভ'
+                    }
+                    return 1; // Block original 'B' or 'b'
 
-               case 0x4D: // 'M' or 'm'
+
+                case 0x56: // 'V' or 'v'
+                    if (isCtrlPressed) return 0; // Allow original key input if Ctrl key is pressed
+
+                    if (!isUppercase()) {
+                        // Handle Lowercase 'v'
+                        SendUnicodeChar(0x56, 0x9AD);  // 'ভ'
+                    } else {
+                        // Handle Uppercase 'V'
+                        SendUnicodeChar(0x56, 0x9AC);  // 'ব'
+                    }
+                    return 1; // Block original 'V' or 'v'
+
+
+                case 0x4D: // 'M' or 'm'
                     if (isCtrlPressed) return 0; // Allow original key input if Ctrl key is pressed
 
                     if (!isUppercase()) {
@@ -779,80 +818,103 @@ LRESULT CALLBACK KeyboardHook(int nCode, WPARAM wParam, LPARAM lParam) {
                         SendUnicodeChar(0x4D, 0x9AE);  // 'ম'
                     } else {
                         // Handle Uppercase 'M'
-                        SendUnicodeChar(0x4A, 0x9B7);  // 'ষ'
+                        SendUnicodeChar(0x4D, 0x9B7);  // 'ষ'
                     }
                     return 1; // Block original 'M' or 'm'
 
-            //    case 0x..: // '' or ''
-            //         SendUnicodeChar(0x.., 0x9AF);  // 'য'
-            //         return 1; // Block original '' or ''
 
-            //    case 0x..: // '' or ''
-            //         SendUnicodeChar(0x.., 0x9B0);  // 'র'
-            //         return 1; // Block original '' or ''
-
-            //    case 0x..: // '' or ''
-            //         SendUnicodeChar(0x.., 0x9B2);  // 'ল'
-            //         return 1; // Block original '' or ''
-
-            //    case 0x..: // '' or ''
-            //         SendUnicodeChar(0x.., 0x9B6);  // 'শ'
-            //         return 1; // Block original '' or ''
-
-            //    case 0x..: // '' or ''
-            //         SendUnicodeChar(0x.., 0x9B7);  // 'ষ'
-            //         return 1; // Block original '' or ''
-
-            //    case 0x..: // '' or ''
-            //         SendUnicodeChar(0x.., 0x9B8);  // 'স'
-            //         return 1; // Block original '' or ''
-
-            //    case 0x..: // '' or ''
-            //         SendUnicodeChar(0x.., 0x9B9);  // 'হ'
-            //         return 1; // Block original '' or ''
-
-            //    case 0x..: // '' or ''
-            //         SendUnicodeChar(0x.., 0x9DC);  // 'ড়'
-            //         return 1; // Block original '' or ''
-
-            //    case 0x..: // '' or ''
-            //         SendUnicodeChar(0x.., 0x9DD);  // 'ঢ়'
-            //         return 1; // Block original '' or ''
-
-            //    case 0x..: // '' or ''
-            //         SendUnicodeChar(0x.., 0x9DF);  // 'য়'
-            //         return 1; // Block original '' or ''
-
-            //    case 0x..: // '' or ''
-            //         SendUnicodeChar(0x.., 0x9ce);  // 'ৎ'
-            //         return 1; // Block original '' or ''
-
-            //    case 0x..: // '' or ''
-            //         SendUnicodeChar(0x.., 0x982);  // 'ং'
-            //         return 1; // Block original '' or ''
-
-            //    case 0x..: // '' or ''
-            //         SendUnicodeChar(0x.., 0x983);  // 'ঃ'
-            //         return 1; // Block original '' or ''
-
-            //    case 0x..: // '' or ''
-            //         SendUnicodeChar(0x.., 0x981);  // 'ঁ'
-            //         return 1; // Block original '' or ''
+                case 0x5A: // 'Z' or 'z'
+                    if (isCtrlPressed) return 0; // Allow original key input if Ctrl key is pressed
+                    
+                    SendUnicodeChar(0x5A, 0x9AF);  // 'য'
+                    return 1; // Block original 'Z' or 'z'
 
 
                 case 0x52: // 'R' or'r'
                     if (isCtrlPressed) return 0; // Allow original key input if Ctrl key is pressed
 
-                    SendUnicodeChar(0x52, 0x9B0);  // 'র'
-                    return 1; // Block original 'R' or 'r'
-                    
-                
+                    if (rho_keyPressCount == 1) {
+                        SendBackspace(1);  // Send One backspaces
+                        SendUnicodeChar(0x52, 0x9DD);  // 'ঢ়'
+                        rho_keyPressCount = 0; // Reset the dho(ঢ়) counter
+                        return 1; // Block original 'R' or'r'
+                    }
 
-               case 0x58: // 'X' or'x'
-                    SendUnicodeChar(0x58, 0x981);  // 'ঁ'
-                    return 1; // Block original '' or ''
-                    
-                // Handle more vowel mappings here if needed
+                    if (!isUppercase()) {
+                        // Handle Lowercase 'r'
+                        SendUnicodeChar(0x52, 0x9B0);  // 'র'
+                    } else {
+                        // Handle Uppercase 'R'
+                        SendUnicodeChar(0x52, 0x9DC);  // 'ড়'
+                    }
+                    return 1; // Block original 'R' or 'r'
+
+
+                case 0x4C: // 'L' or 'l'
+                    if (isCtrlPressed) return 0; // Allow original key input if Ctrl key is pressed
+
+                    SendUnicodeChar(0x4C, 0x9B2);  // 'ল'
+                    return 1; // Block original 'L' or 'l'
+
+
+                case 0x53: // 'S' or 's'
+                    if (isCtrlPressed) return 0; // Allow original key input if Ctrl key is pressed
+
+                    if (!isUppercase()) {
+                        // Handle Lowercase 's'
+                        SendUnicodeChar(0x53, 0x9B8);  // 'স'
+                    } else {
+                        // Handle Uppercase 'S'
+                        SendUnicodeChar(0x53, 0x9B6);  // 'শ'
+                    }
+                    return 1; // Block original 'S' or 's'
+
+
+                case 0x48: // 'H' or 'h'
+                    if (isCtrlPressed) return 0; // Allow original key input if Ctrl key is pressed
+
+                    SendUnicodeChar(0x48, 0x9B9);  // 'হ'
+                    return 1; // Block original 'H' or 'h'
+
+
+                case 0x59: // 'Y' or 'y'
+                    if (isCtrlPressed) return 0; // Allow original key input if Ctrl key is pressed
+
+                    SendUnicodeChar(0x59, 0x9DF);  // 'য়'
+                    return 1; // Block original 'Y' or 'y'
+
+
+                case 0x51: // 'Q' or 'q'
+                    if (isCtrlPressed) return 0; // Allow original key input if Ctrl key is pressed
+
+                    if (!isUppercase()) {
+                        // Handle Lowercase 'q'
+                        SendUnicodeChar(0x51, 0x9ce);  // 'ৎ'
+                    } else {
+                        // Handle Uppercase 'Q'
+                        SendUnicodeChar(0x51, 0x982);  // 'ং'
+                    }
+                    return 1; // Block original 'Q' or 'q'
+
+
+                case 0xBA: // (Colon)':'
+                    if (isCtrlPressed) return 0; // Allow original key input if Ctrl key is pressed
+
+                    if (isShiftPressed()) {
+                        SendUnicodeChar(0xBA, 0x983);  // 'ঃ'
+                        return 1; // Block original (Colon)':'
+                    }
+                    return 0; // Allow original key input if Ctrl key is pressed
+
+
+                case 0x36: // (^)'^'
+                    if (isCtrlPressed) return 0; // Allow original key input if Ctrl key is pressed
+
+                    if (isShiftPressed()) {
+                        SendUnicodeChar(0xDC, 0x981);  // 'ঁ'
+                        return 1; // Block original (^)'^'
+                    }
+                    return 0; // Allow original key input if Ctrl key is pressed
 
             }
         }
